@@ -1,11 +1,20 @@
 import { StackActions, useNavigation } from "@react-navigation/native"
 import * as Yup from "yup"
 import React from "react"
-import { Pressable, View, SafeAreaView, Text, StyleSheet } from "react-native"
+import {
+  Pressable,
+  View,
+  SafeAreaView,
+  Text,
+  StyleSheet,
+  ToastAndroid,
+} from "react-native"
 import InputField from "../components/InputField"
 import SubmitButton from "../components/SubmitButton"
 import { Formik } from "formik"
 import BackButton from "../components/BackButton"
+import firestore from "@react-native-firebase/firestore"
+import auth from "@react-native-firebase/auth"
 
 const validationSchema = Yup.object().shape({
   fullName: Yup.string().required("required"),
@@ -42,8 +51,36 @@ const Register: React.FC = () => {
           }}
           validationSchema={validationSchema}
           onSubmit={(values, { resetForm }) => {
-            console.warn(values)
-            resetForm()
+            auth()
+              .createUserWithEmailAndPassword(values.email, values.password)
+              .then((snapShot) => {
+                firestore()
+                  .collection("users")
+                  .doc(snapShot.user.uid)
+                  .set({
+                    fullName: values.fullName,
+                    email: values.email,
+                  })
+                  .then(() => {
+                    ToastAndroid.show(
+                      "Account registered successfully.",
+                      ToastAndroid.SHORT
+                    )
+                    navigation.dispatch(StackActions.replace("signin_screen"))
+                    resetForm()
+                  })
+                  .catch((error) =>
+                    ToastAndroid.show(error.code, ToastAndroid.SHORT)
+                  )
+              })
+              .catch((error) => {
+                if (error.code === "auth/email-already-in-use") {
+                  ToastAndroid.show(
+                    "Account already registered.",
+                    ToastAndroid.SHORT
+                  )
+                }
+              })
           }}
         >
           {({
@@ -54,12 +91,12 @@ const Register: React.FC = () => {
             errors,
             handleSubmit,
             resetForm,
+            isSubmitting,
           }) => (
             <>
               <InputField
                 label="Full name"
                 placeholder="John Doe"
-                isEmail
                 value={values.fullName}
                 onChangeText={handleChange(`fullName`)}
                 onBlur={handleBlur(`fullName`) as any}
@@ -94,7 +131,10 @@ const Register: React.FC = () => {
               </View>
 
               <View style={{ marginVertical: 12 }}>
-                <SubmitButton text="Register" onPress={handleSubmit} />
+                <SubmitButton
+                  text={isSubmitting ? "Please wait..." : "Register"}
+                  onPress={handleSubmit}
+                />
               </View>
 
               <View

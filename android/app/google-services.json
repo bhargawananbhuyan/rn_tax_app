@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "145771003907",
+    "project_id": "personal-354c6",
+    "storage_bucket": "personal-354c6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145771003907:android:4292eae1c3ebf36c344e36",
+        "android_client_info": {
+          "package_name": "com.tax_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "145771003907-id8bkdo7t49sfpbqkr8rvtfhaasplsgi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tax_app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "145771003907-mh3hdqsn5in1mo2icgfo62o60f8vopfj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5hy0sLOo5kW89pe3Siq36Bk4ZOB0Ji3c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "145771003907-mh3hdqsn5in1mo2icgfo62o60f8vopfj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

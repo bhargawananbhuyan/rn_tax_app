@@ -1,11 +1,26 @@
 import { StackActions, useNavigation } from "@react-navigation/native"
-import React from "react"
+import React, { useEffect } from "react"
 import { SafeAreaView, StyleSheet, Text, View } from "react-native"
 import SubmitButton from "../components/SubmitButton"
 import { colors } from "../utils/constants"
+import auth from "@react-native-firebase/auth"
 
 const Landing = () => {
   const navigation = useNavigation()
+
+  useEffect(() => {
+    const subscribe = auth().onAuthStateChanged((user) => {
+      if (user) {
+        navigation.dispatch(
+          StackActions.replace("homepage_screen", {
+            uid: user.uid,
+          })
+        )
+      }
+    })
+
+    return subscribe
+  }, [])
 
   return (
     <SafeAreaView style={styles.root}>

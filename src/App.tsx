@@ -15,7 +15,7 @@ const App: React.FC = () => {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          animation: "slide_from_right",
+          animation: "fade_from_bottom",
         }}
       >
         <Stack.Screen name="landing_screen" component={Landing} />

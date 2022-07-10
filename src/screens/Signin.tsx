@@ -1,10 +1,19 @@
 import { StackActions, useNavigation } from "@react-navigation/native"
 import { Formik } from "formik"
 import React from "react"
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native"
+import {
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from "react-native"
 import * as Yup from "yup"
 import InputField from "../components/InputField"
 import SubmitButton from "../components/SubmitButton"
+
+import auth from "@react-native-firebase/auth"
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email("please enter a valid email").required("required"),
@@ -35,8 +44,21 @@ const Signin: React.FC = () => {
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}
           onSubmit={(values, { resetForm }) => {
-            navigation.dispatch(StackActions.replace("homepage_screen"))
-            resetForm()
+            auth()
+              .signInWithEmailAndPassword(values.email, values.password)
+              .then((snapShot) => {
+                navigation.dispatch(
+                  StackActions.replace("homepage_screen", {
+                    uid: snapShot.user.uid,
+                  })
+                )
+                resetForm()
+              })
+              .catch((error) => {
+                if (error.code === "auth/user-not-found") {
+                  ToastAndroid.show("User not registered.", ToastAndroid.SHORT)
+                }
+              })
           }}
         >
           {({
@@ -47,6 +69,7 @@ const Signin: React.FC = () => {
             errors,
             handleSubmit,
             resetForm,
+            isSubmitting,
           }) => (
             <>
               <InputField
@@ -73,7 +96,10 @@ const Signin: React.FC = () => {
                 />
               </View>
 
-              <SubmitButton text="Sign in" onPress={handleSubmit} />
+              <SubmitButton
+                text={isSubmitting ? "Please wait..." : "Sign in"}
+                onPress={handleSubmit}
+              />
 
               <View
                 style={{

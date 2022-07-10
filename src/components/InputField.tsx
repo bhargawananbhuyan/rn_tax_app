@@ -29,30 +29,31 @@ const InputField: React.FC<InputProps> = ({
   const toggleVisibility = () => setShowPassword(!showPassword)
 
   return (
-    <View style={styles.root}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={styles.inputField}
-        placeholder={placeholder}
-        placeholderTextColor="#bcbcbc"
-        secureTextEntry={isPassword && !showPassword}
-        keyboardType={isEmail ? "email-address" : "ascii-capable"}
-        value={value}
-        onChangeText={onChangeText}
-        onBlur={onBlur}
-      />
-      {isPassword && (
-        <Pressable style={styles.hideButton} onPress={toggleVisibility}>
-          <Icon
-            name={showPassword ? "visibility" : "visibility-off"}
-            size={20}
-            color="#757575"
-          />
-        </Pressable>
-      )}
-
+    <>
+      <View style={styles.root}>
+        <Text style={styles.label}>{label}</Text>
+        <TextInput
+          style={styles.inputField}
+          placeholder={placeholder}
+          placeholderTextColor="#bcbcbc"
+          secureTextEntry={isPassword && !showPassword}
+          keyboardType={isEmail ? "email-address" : "ascii-capable"}
+          value={value}
+          onChangeText={onChangeText}
+          onBlur={onBlur}
+        />
+        {isPassword && (
+          <Pressable style={styles.hideButton} onPress={toggleVisibility}>
+            <Icon
+              name={showPassword ? "visibility" : "visibility-off"}
+              size={20}
+              color="#757575"
+            />
+          </Pressable>
+        )}
+      </View>
       {error && <Text style={styles.error}>*{errorMsg}</Text>}
-    </View>
+    </>
   )
 }
 
@@ -66,6 +67,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderColor: "#dbdbdb",
     borderRadius: 5,
+    color: "#000",
   },
   label: {
     marginBottom: 5,
