@@ -6,6 +6,8 @@ import Landing from "./screens/Landing"
 import Signin from "./screens/Signin"
 import Register from "./screens/Register"
 import Homepage from "./screens/Homepage"
+import AddTransaction from "./screens/AddTransaction"
+import EditTransaction from "./screens/EditTransaction"
 
 const Stack = createNativeStackNavigator()
 
@@ -22,6 +24,8 @@ const App: React.FC = () => {
         <Stack.Screen name="signin_screen" component={Signin} />
         <Stack.Screen name="register_screen" component={Register} />
         <Stack.Screen name="homepage_screen" component={Homepage} />
+        <Stack.Screen name="add_screen" component={AddTransaction} />
+        <Stack.Screen name="edit_screen" component={EditTransaction} />
       </Stack.Navigator>
     </NavigationContainer>
   )

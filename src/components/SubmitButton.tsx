@@ -4,12 +4,16 @@ import { Pressable, StyleSheet, Text } from "react-native"
 type SubmitButtonProps = {
   text: string
   onPress: () => void
+  color?: string
 }
 
 const SubmitButton = (props: SubmitButtonProps) => {
   return (
     <Pressable
-      style={styles.submitButton}
+      style={[
+        styles.submitButton,
+        { backgroundColor: props.color ?? "#f87171" },
+      ]}
       android_ripple={{ color: "#ffffff" }}
       onPress={props.onPress}
     >
@@ -20,7 +24,6 @@ const SubmitButton = (props: SubmitButtonProps) => {
 
 const styles = StyleSheet.create({
   submitButton: {
-    backgroundColor: "#f87171",
     alignItems: "center",
     padding: 18,
     borderRadius: 5,
