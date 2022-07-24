@@ -1,11 +1,12 @@
 import firestore from "@react-native-firebase/firestore"
 import { StackActions, useNavigation, useRoute } from "@react-navigation/native"
 import React, { useState } from "react"
-import { StyleSheet, Text, ToastAndroid, View } from "react-native"
+import { Text, ToastAndroid, View } from "react-native"
 import BackButton from "../components/BackButton"
 import Dropdown from "../components/Dropdown"
 import InputField from "../components/InputField"
 import SubmitButton from "../components/SubmitButton"
+import auth from "@react-native-firebase/auth"
 
 const options = ["Earning", "Expenditure"]
 
@@ -63,6 +64,14 @@ const EditTransaction: React.FC<any> = () => {
             <SubmitButton
               text="Edit"
               onPress={async () => {
+                if (title === "" || amount === "") {
+                  ToastAndroid.show(
+                    "All fields are required.",
+                    ToastAndroid.SHORT
+                  )
+                  return
+                }
+
                 await firestore()
                   .collection("transactions")
                   .doc(params.id)
@@ -93,7 +102,15 @@ const EditTransaction: React.FC<any> = () => {
                   .collection("transactions")
                   .doc(params.id)
                   .delete()
-                  .then(() => {
+                  .then(async () => {
+                    if (value === options[0]) {
+                      await firestore()
+                        .collection("taxes")
+                        .doc(auth().currentUser?.uid)
+                        .update({
+                          at: params.currentTotal - parseFloat(amount),
+                        })
+                    }
                     ToastAndroid.show(
                       "Transaction deleted successfully.",
                       ToastAndroid.SHORT
@@ -112,7 +129,5 @@ const EditTransaction: React.FC<any> = () => {
     </View>
   )
 }
-
-const styles = StyleSheet.create({})
 
 export default EditTransaction

@@ -1,12 +1,12 @@
+import auth from "@react-native-firebase/auth"
+import firestore from "@react-native-firebase/firestore"
 import { StackActions, useNavigation } from "@react-navigation/native"
 import React, { useState } from "react"
-import { StyleSheet, Text, ToastAndroid, View } from "react-native"
+import { Text, ToastAndroid, View } from "react-native"
 import BackButton from "../components/BackButton"
 import Dropdown from "../components/Dropdown"
 import InputField from "../components/InputField"
 import SubmitButton from "../components/SubmitButton"
-import auth from "@react-native-firebase/auth"
-import firestore from "@react-native-firebase/firestore"
 
 const options = ["Earning", "Expenditure"]
 
@@ -60,6 +60,11 @@ const AddTransaction = () => {
         <SubmitButton
           text="Submit"
           onPress={async () => {
+            if (title === "" || amount === "") {
+              ToastAndroid.show("All fields are required.", ToastAndroid.SHORT)
+              return
+            }
+
             await firestore()
               .collection("transactions")
               .add({
@@ -69,7 +74,16 @@ const AddTransaction = () => {
                 amount: parseFloat(amount),
                 createdAt: firestore.FieldValue.serverTimestamp(),
               })
-              .then(() => {
+              .then(async () => {
+                if (value === options[0]) {
+                  await firestore()
+                    .collection("taxes")
+                    .doc(auth().currentUser?.uid)
+                    .update({
+                      cleared: false,
+                    })
+                }
+
                 ToastAndroid.show(
                   "Transaction added successfully",
                   ToastAndroid.SHORT
@@ -85,7 +99,5 @@ const AddTransaction = () => {
     </View>
   )
 }
-
-const styles = StyleSheet.create({})
 
 export default AddTransaction

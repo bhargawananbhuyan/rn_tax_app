@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native"
 import Icon from "react-native-vector-icons/MaterialIcons"
+import Menu from "../components/Menu"
 import Transaction from "../components/Transaction"
 import { colors } from "../utils/constants"
 import { calculateTaxes } from "../utils/taxUtils"
@@ -27,6 +28,14 @@ const Homepage = () => {
     transactions: [],
     error: "",
   })
+
+  useEffect(() => {
+    auth().onAuthStateChanged((user) => {
+      if (!user) {
+        navigation.dispatch(StackActions.replace("landing_screen"))
+      }
+    })
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -63,18 +72,26 @@ const Homepage = () => {
     return () => subscribe()
   }, [user])
 
-  const menuPressHandler = () => {
-    auth()
-      .signOut()
-      .then(() => {
-        navigation.dispatch(StackActions.replace("signin_screen"))
-      })
-      .catch((error) => console.error(error))
-  }
-
   const fabHandler = () => {
     navigation.navigate("add_screen" as any)
   }
+
+  const [taxObj, setTaxObj] = useState(null)
+  useEffect(() => {
+    const subscribe = firestore()
+      .collection("taxes")
+      .onSnapshot((snapShot) => {
+        if (!snapShot.empty) {
+          snapShot.forEach((doc) => {
+            if (doc.id === auth().currentUser?.uid) {
+              setTaxObj(doc.data() as any)
+            }
+          })
+        }
+      })
+
+    return () => subscribe()
+  }, [])
 
   return (
     <SafeAreaView style={styles.root}>
@@ -84,16 +101,7 @@ const Homepage = () => {
         </View>
       ) : (
         <View style={{ flex: 1 }}>
-          <View
-            style={{ position: "absolute", right: 16, top: 20, zIndex: 100 }}
-          >
-            <Pressable
-              android_ripple={{ color: "#fff" }}
-              onPress={menuPressHandler}
-            >
-              <Icon name="keyboard-control" size={32} color="#000" />
-            </Pressable>
-          </View>
+          <Menu user={user} />
 
           <View
             style={{ position: "absolute", right: 16, bottom: 28, zIndex: 100 }}
@@ -111,7 +119,7 @@ const Homepage = () => {
             <View style={{ paddingTop: 42, paddingBottom: 21 }}>
               <Text style={{ color: "#000", fontSize: 21 }}>
                 Good{" "}
-                {hour > 12
+                {hour > 12 && hour < 17
                   ? "afternoon"
                   : hour > 17 && hour < 24
                   ? "evening"
@@ -121,7 +129,9 @@ const Homepage = () => {
                 </Text>
               </Text>
               <Text style={{ marginTop: 5, fontSize: 12 }}>
-                Clear outstanding taxes to reduce fine.
+                {calculateTaxes(data.transactions, taxObj as any).tax === 0
+                  ? "Rest assured, your taxes are paid."
+                  : "Clear outstanding taxes to reduce fine."}
               </Text>
             </View>
 
@@ -145,7 +155,11 @@ const Homepage = () => {
                   <Text
                     style={{ fontSize: 16, fontWeight: "900", color: "#000" }}
                   >
-                    ${calculateTaxes(data.transactions).total}
+                    {taxObj &&
+                      `$${
+                        calculateTaxes(data.transactions, taxObj).earnings -
+                        calculateTaxes(data.transactions, taxObj).expenditure
+                      }`}
                   </Text>
                   <Text
                     style={{ color: "#22c55e", fontSize: 12, marginTop: 3.5 }}
@@ -161,18 +175,38 @@ const Homepage = () => {
                     marginHorizontal: 16,
                   }}
                 />
-                <View style={{ alignItems: "center" }}>
-                  <Text
-                    style={{ fontSize: 16, fontWeight: "900", color: "#000" }}
-                  >
-                    ${calculateTaxes(data.transactions).tax}
-                  </Text>
-                  <Text
-                    style={{ color: "#ef4444", fontSize: 12, marginTop: 3.5 }}
-                  >
-                    Tax to pay
-                  </Text>
-                </View>
+                <Pressable
+                  disabled={
+                    calculateTaxes(data.transactions, taxObj as any).tax === 0
+                  }
+                  onPress={() =>
+                    navigation.navigate(
+                      "taxpay_screen" as never,
+                      {
+                        userId: auth().currentUser?.uid,
+                        income: calculateTaxes(data.transactions, taxObj as any)
+                          .earnings,
+                        tax: calculateTaxes(data.transactions, taxObj as any)
+                          .tax,
+                        prevTaxedAt: (taxObj as any)?.at,
+                      } as never
+                    )
+                  }
+                >
+                  <View style={{ alignItems: "center" }}>
+                    <Text
+                      style={{ fontSize: 16, fontWeight: "900", color: "#000" }}
+                    >
+                      {taxObj &&
+                        `$${calculateTaxes(data.transactions, taxObj).tax}`}
+                    </Text>
+                    <Text
+                      style={{ color: "#ef4444", fontSize: 12, marginTop: 3.5 }}
+                    >
+                      Tax to pay
+                    </Text>
+                  </View>
+                </Pressable>
               </View>
             </View>
 
@@ -191,6 +225,10 @@ const Homepage = () => {
                     navigation.navigate(
                       "edit_screen" as never,
                       {
+                        currentTotal: calculateTaxes(
+                          data.transactions,
+                          taxObj as any
+                        ).earnings,
                         ...transaction,
                       } as never
                     )

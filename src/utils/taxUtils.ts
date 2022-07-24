@@ -1,11 +1,17 @@
-export const calculateTaxes = (transactions: object[]) => {
-    let total = 0
+type TaxObjProps = {
+    at: number,
+    amount: number,
+    cleared: boolean
+}
+
+export const calculateTaxes = (transactions: object[], taxObj: TaxObjProps) => {
+    let earnings: number = 0, expenditure: number = 0
     transactions.forEach((transaction: any) => {
         if (transaction.transactionType === 'Earning')
-            total += transaction.amount
+            earnings += transaction.amount
          else 
-            total -= transaction.amount
-    })
+            expenditure += transaction.amount
+    }) 
 
-    return {total, tax: 0.01 * total}
+    return {earnings, expenditure, tax: taxObj?.at === earnings ? 0: 0.01 * (earnings - taxObj?.at)}
 }
